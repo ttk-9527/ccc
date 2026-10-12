@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-accent="yellow" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GST·AI — 人工智能应用 · 在读学生 // NIGHT CITY DOSSIER</title>
+<meta name="description" content="广东科学技术职业学院 · 人工智能应用专业 · 在读学生。赛博朋克风格交互式个人简历。">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#04010b">
+<meta name="author" content="GST·AI">
+<meta property="og:title" content="GST·AI — 人工智能应用 · 在读学生">
+<meta property="og:description" content="广东科学技术职业学院 · 人工智能应用专业 · 赛博朋克风格交互式简历">
+<meta property="og:type" content="profile">
+<!-- E1 分享预览：og 图为本地 assets/og.png（1200×630，不含个人信息）；部署到公网后需换绝对 URL -->
+<meta property="og:image" content="assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="NIGHT CITY DOSSIER 分享预览图">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GST·AI — NIGHT CITY DOSSIER">
+<meta name="twitter:description" content="赛博朋克风格交互式个人简历">
+
+<!-- 内联 SVG favicon：黄底黑角标，零请求 -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2304010b'/%3E%3Cpath d='M6 26V6h20v20H6zm3-3h14V9H9v14z' fill='%23fcee0a'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%2300f0ff'/%3E%3C/svg%3E">
+
+<!-- 字体：Orbitron（标题） / Rajdhani（正文） / Share Tech Mono（数据） / Noto Sans SC（中文） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
+
+<!-- CSS 加载顺序契约（勿调整，详见 README「架构与约定」）：
+     tokens → base → layout → components/*（按区块拆分） → fx → responsive（必须最后） -->
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components/primitives.css">
+<link rel="stylesheet" href="css/components/hero.css">
+<link rel="stylesheet" href="css/components/profile.css">
+<link rel="stylesheet" href="css/components/skills.css">
+<link rel="stylesheet" href="css/components/career.css">
+<link rel="stylesheet" href="css/components/works.css">
+<link rel="stylesheet" href="css/components/contact.css">
+<link rel="stylesheet" href="css/components/empty.css">
+<link rel="stylesheet" href="css/fx.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<script>
+document.documentElement.classList.remove('no-js');
+/* 站长模式：URL 加 ?edit=1 时展示字段填法等开发提示（.owner-hint 默认对访客隐藏） */
+if (/[?&]edit(?:[=&]|$)/.test(location.search)) document.documentElement.classList.add('edit-mode');
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#status">跳到主要内容</a>
+
+<!-- ══════════ 动态背景层（Canvas） ══════════ -->
+<div class="bg-stack" aria-hidden="true">
+  <div class="bg-gradient"></div>
+  <canvas id="bg-canvas"></canvas>
+</div>
+
+<!-- ══════════ CRT / 故障叠加层 ══════════ -->
+<div class="fx-stack" aria-hidden="true">
+  <div class="fx-scanlines" id="fx-scanlines"></div>
+  <div class="fx-noise"></div>
+  <div class="fx-vignette"></div>
+  <div class="fx-chroma"></div>
+  <div class="fx-scratch" aria-hidden="true"></div>
+</div>
+
+<!-- ══════════ HUD 边角框架 ══════════ -->
+<div class="hud-frame" aria-hidden="true">
+  <span class="hud-corner hud-corner--tl"></span>
+  <span class="hud-corner hud-corner--tr"></span>
+  <span class="hud-corner hud-corner--bl"></span>
+  <span class="hud-corner hud-corner--br"></span>
+  <span class="hud-ruler hud-ruler--l"></span>
+  <span class="hud-ruler hud-ruler--r"></span>
+  <span class="hud-side-code" aria-hidden="true">DOSSIER ACCESS // NIGHT CITY NET</span>
+</div>
+
+<!-- ══════════ 启动序列 ══════════ -->
+<div class="boot" id="boot" role="dialog" aria-modal="true" aria-label="系统启动序列">
+  <div class="boot__panel">
+    <div class="boot__head">
+      <span class="boot__brand">NIGHT&nbsp;CITY&nbsp;NET</span>
+      <span class="boot__ver">DOSSIER TERMINAL v2.077</span>
+    </div>
+    <div class="boot__body">
+      <!-- D3：打字期逐字播报已关闭（aria-live=off），完成态由下方 sr-only status 一次性播报 -->
+      <pre class="boot__log" id="boot-log" aria-live="off"></pre>
+      <div class="boot__bar" role="progressbar" aria-label="载入进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="boot-progress">
+        <span class="boot__bar-fill" id="boot-bar-fill"></span>
+      </div>
+      <div class="boot__pct" id="boot-pct">000%</div>
+      <p class="sr-only" id="boot-status" role="status" aria-live="polite"></p>
+    </div>
+    <button class="boot__enter" id="boot-enter" type="button" hidden>
+      <span class="boot__enter-key">[ ENTER ]</span>
+      <span class="boot__enter-txt">接入档案</span>
+    </button>
+    <p class="boot__skip">按任意键跳过 · PRESS ANY KEY</p>
+  </div>
+</div>
+
+<!-- ══════════ 顶部 HUD 导航 ══════════ -->
+<header class="hud-top" id="hud-top">
+  <a class="hud-top__brand" href="#status" data-sfx="click">
+    <span class="brand__mark">◤</span>
+    <span class="brand__text">
+      <b id="brand-name">—</b>
+      <i id="brand-sub">—</i>
+    </span>
+  </a>
+
+  <nav class="hud-nav" id="hud-nav" aria-label="主导航">
+    <a class="hud-nav__item is-active" href="#status"  data-nav="status">  <em>01</em><span>STATUS</span></a>
+    <a class="hud-nav__item"           href="#skills"  data-nav="skills">  <em>02</em><span>SKILLS</span></a>
+    <a class="hud-nav__item"           href="#career"  data-nav="career">  <em>03</em><span>CAREER</span></a>
+    <a class="hud-nav__item"           href="#works"   data-nav="works">   <em>04</em><span>WORKS</span></a>
+    <a class="hud-nav__item"           href="#contact" data-nav="contact"> <em>05</em><span>CONTACT</span></a>
+    <span class="hud-nav__ink" id="hud-nav-ink" aria-hidden="true"></span>
+  </nav>
+
+  <div class="hud-top__tools">
+    <button class="tool-btn" id="accent-btn" type="button" aria-label="切换主题配色" title="切换主题配色 (T)">
+      <span class="tool-btn__dot" id="accent-dot"></span>
+    </button>
+    <button class="tool-btn" id="sound-btn" type="button" aria-label="开关音效" aria-pressed="false" title="开关音效 (M)">
+      <span class="tool-btn__ico" id="sound-ico">OFF</span>
+    </button>
+    <button class="tool-btn tool-btn--wide" id="terminal-btn" type="button" aria-label="打开命令终端" title="命令终端 (Ctrl/⌘ + K)">
+      <span>⌘</span><span>K</span>
+    </button>
+    <span class="hud-clock" id="hud-clock" aria-hidden="true">--:--:--</span>
+  </div>
+
+  <button class="hud-burger" id="hud-burger" type="button" aria-label="展开导航" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="scroll-rail" aria-hidden="true">
+  <span class="scroll-rail__fill" id="scroll-fill"></span>
+</div>
+
+<main id="main">
+
+  <!-- ══════════ 01 STATUS ══════════ -->
+  <section class="sect sect--status" id="status" aria-labelledby="status-title">
+    <div class="sect__bg sect__bg--hero"></div>
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>
+        <span class="eyebrow__tag">DOSSIER</span>
+        <span class="eyebrow__txt" id="eyebrow-meta">—</span>
+      </p>
+
+      <div class="hero">
+        <div class="hero__main">
+          <h1 class="hero__name" id="status-title" data-reveal>
+            <span class="glitch" id="hero-name" data-text="">—</span>
+          </h1>
+          <p class="hero__cn" id="hero-name-sub" data-reveal>—</p>
+
+          <p class="hero__role" data-reveal>
+            <span class="hero__role-cn" id="hero-role">—</span>
+            <span class="hero__role-en" id="hero-role-en">—</span>
+          </p>
+
+          <p class="hero__type">
+            <span class="type-prompt">&gt;</span>
+            <span class="type-target" id="hero-type" aria-live="off"></span><span class="type-caret"></span>
+          </p>
+
+          <div class="hero__cta" data-reveal>
+            <a class="btn btn--primary" href="#works" data-sfx="click">
+              <span class="btn__label">查看作品</span><span class="btn__arrow">▸</span>
+            </a>
+            <a class="btn btn--ghost" href="#contact" data-sfx="click">
+              <span class="btn__label">发起联络</span>
+            </a>
+            <button class="btn btn--ghost btn--term" type="button" data-term="help">
+              <span class="btn__label">打开终端</span><span class="btn__kbd">⌘K</span>
+            </button>
+          </div>
+        </div>
+
+        <aside class="idcard" data-tilt data-reveal>
+          <div class="idcard__glow" aria-hidden="true"></div>
+          <header class="idcard__head">
+            <span class="idcard__tag">身份卡</span>
+            <span class="idcard__no" id="idcard-no">—</span>
+          </header>
+          <div class="idcard__photo" id="idcard-photo"></div>
+          <dl class="idcard__rows" id="idcard-rows"></dl>
+          <footer class="idcard__foot">
+            <span class="idcard__status" id="idcard-status"><i aria-hidden="true"></i><span>—</span></span>
+            <span class="idcard__barcode" aria-hidden="true"></span>
+          </footer>
+        </aside>
+
+        <!-- 数据条：.hero 直属行、横跨两列（全宽带），让院校全称等长值同字号单行放下 -->
+        <ul class="stat-row" id="hero-stats" data-reveal></ul>
+      </div>
+
+      <!-- ── 关于我：图标 + 标签 + 值 的卡片网格 ── -->
+      <div class="block">
+        <div class="block__head" data-reveal>
+          <span class="block__bar" aria-hidden="true"></span>
+          <h2 class="block__title">关于我</h2>
+          <span class="block__sub">带「复制」标记的卡片可直接点击复制</span>
+        </div>
+        <ul class="profile-grid" id="profile-grid" data-reveal></ul>
+      </div>
+
+      <!-- ── 个人摘要 ── -->
+      <div class="block">
+        <div class="block__head" data-reveal>
+          <span class="block__bar" aria-hidden="true"></span>
+          <h2 class="block__title">个人摘要</h2>
+          <span class="block__sub">SUMMARY</span>
+        </div>
+        <article class="panel panel--brief" data-reveal>
+          <div class="panel__body" id="profile-brief"></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 02 SKILLS ══════════ -->
+  <section class="sect" id="skills" aria-labelledby="skills-title">
+    <div class="wrap">
+      <header class="sect__head">
+        <span class="sect__ghost" aria-hidden="true">02</span>
+        <p class="sect__idx" data-reveal>02 / SKILLS</p>
+        <h2 class="sect__title" data-reveal id="skills-title">
+          <span class="glitch" data-text="SKILL MATRIX">SKILL MATRIX</span>
+        </h2>
+        <p class="sect__cn" data-reveal>技能矩阵</p>
+        <p class="sect__sub" data-reveal>技能条按熟练度评分 · 八轴雷达呈现能力分布</p>
+      </header>
+
+      <div class="skills-grid" id="skills-grid">
+        <div class="panel panel--bars" data-reveal>
+          <h3 class="panel__title"><span class="panel__idx">STACK</span>技术栈强度</h3>
+          <ul class="bar-list" id="skill-bars"></ul>
+          <p class="panel__note">条形长度 = 熟练度评分（0–100），右侧标注实际使用年限。</p>
+        </div>
+
+        <div class="panel panel--radar" data-reveal>
+          <h3 class="panel__title"><span class="panel__idx">RADAR</span>能力分布</h3>
+          <div class="radar-wrap">
+            <canvas id="radar-canvas" width="440" height="440" role="img" aria-label="八项技术栈能力雷达图"></canvas>
+            <ul class="radar-legend" id="radar-legend"></ul>
+          </div>
+        </div>
+
+        <div class="panel panel--attrs" data-reveal>
+          <h3 class="panel__title"><span class="panel__idx">ATTR</span>能力参数</h3>
+          <ul class="attr-list" id="attr-list"></ul>
+          <p class="panel__note">游戏化自评，仅用于表达工作风格取向。</p>
+        </div>
+      </div>
+
+      <div id="skills-missing" hidden></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 03 CAREER ══════════ -->
+  <section class="sect" id="career" aria-labelledby="career-title">
+    <div class="sect__bg sect__bg--circuit"></div>
+    <div class="wrap">
+      <header class="sect__head">
+        <span class="sect__ghost" aria-hidden="true">03</span>
+        <p class="sect__idx" data-reveal>03 / CAREER</p>
+        <h2 class="sect__title" data-reveal id="career-title">
+          <span class="glitch" data-text="SERVICE RECORD">SERVICE RECORD</span>
+        </h2>
+        <p class="sect__cn" data-reveal>相关经历</p>
+        <p class="sect__sub" data-reveal>按时间倒序 · 点击「查看职责」展开明细</p>
+      </header>
+
+      <ol class="timeline" id="career-timeline"></ol>
+      <div id="career-missing" hidden></div>
+
+      <!-- ── 荣誉奖项：与「相关经历」同一套版式，仅在 awards 有数据时显示 ── -->
+      <div class="block" id="awards-block" hidden>
+        <div class="block__head">
+          <span class="block__bar" aria-hidden="true"></span>
+          <h2 class="block__title">荣誉奖项</h2>
+          <span class="block__sub">点击「查看证书」查看获奖凭证</span>
+        </div>
+        <ol class="timeline timeline--award" id="awards-timeline"></ol>
+      </div>
+
+      <div class="edu-strip" data-reveal>
+        <span class="edu-strip__k">EDUCATION</span>
+        <span class="edu-strip__v" id="edu-text">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 04 WORKS ══════════ -->
+  <section class="sect" id="works" aria-labelledby="works-title">
+    <div class="wrap">
+      <header class="sect__head">
+        <span class="sect__ghost" aria-hidden="true">04</span>
+        <p class="sect__idx" data-reveal>04 / WORKS</p>
+        <h2 class="sect__title" data-reveal id="works-title">
+          <span class="glitch" data-text="ARCHIVE">ARCHIVE</span>
+        </h2>
+        <p class="sect__cn" data-reveal>项目与作品</p>
+        <p class="sect__sub" data-reveal>按技术栈筛选 · 悬停可交互</p>
+      </header>
+
+      <div class="filter-row" id="works-filters" role="group" aria-label="按技术栈筛选项目"></div>
+      <div class="work-grid" id="works-grid"></div>
+      <p class="empty-hint" id="works-empty" hidden>没有匹配该技术栈的项目 — <button type="button" class="linkish" data-filter-reset>重置筛选</button></p>
+      <div id="works-missing" hidden></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 05 CONTACT ══════════ -->
+  <section class="sect" id="contact" aria-labelledby="contact-title">
+    <div class="wrap">
+      <header class="sect__head">
+        <span class="sect__ghost" aria-hidden="true">05</span>
+        <p class="sect__idx" data-reveal>05 / CONTACT</p>
+        <h2 class="sect__title" data-reveal id="contact-title">
+          <span class="glitch" data-text="OPEN CHANNEL">OPEN CHANNEL</span>
+        </h2>
+        <p class="sect__cn" data-reveal>联系方式</p>
+        <p class="sect__sub" data-reveal>如果你有合适的岗位或项目，欢迎随时接入。</p>
+      </header>
+
+      <div class="contact-grid">
+        <div class="panel" data-reveal>
+          <h3 class="panel__title"><span class="panel__idx">LINK</span>直达频道</h3>
+          <ul class="copy-list" id="copy-list"></ul>
+        </div>
+
+        <form class="panel panel--form" id="contact-form" data-reveal novalidate>
+          <h3 class="panel__title"><span class="panel__idx">SEND</span>发送讯息</h3>
+
+          <div class="field">
+            <label class="field__label" for="cf-name">称呼 / CODENAME <i aria-hidden="true">*</i></label>
+            <input class="field__input" id="cf-name" name="name" type="text" autocomplete="name"
+                   placeholder="怎么称呼你？" required aria-describedby="cf-name-err">
+            <p class="field__err" id="cf-name-err" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="cf-mail">回信地址 / EMAIL <i aria-hidden="true">*</i></label>
+            <input class="field__input" id="cf-mail" name="email" type="email" autocomplete="email"
+                   placeholder="you@company.com" required aria-describedby="cf-mail-err">
+            <p class="field__err" id="cf-mail-err" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="cf-msg">讯息内容 / MESSAGE <i aria-hidden="true">*</i></label>
+            <textarea class="field__input field__input--area" id="cf-msg" name="message" rows="5"
+                      placeholder="岗位、团队、项目背景，以及你希望我解决的问题…" required aria-describedby="cf-msg-err"></textarea>
+            <p class="field__err" id="cf-msg-err" role="alert"></p>
+            <p class="field__count"><span id="cf-count">0</span> / 600</p>
+          </div>
+
+          <div class="form__foot">
+            <button class="btn btn--primary" type="submit" id="cf-submit">
+              <span class="btn__label">发送</span><span class="btn__arrow">▸</span>
+            </button>
+            <span class="form__hint" id="form-hint">静态站点，发送后将唤起你的邮件客户端。</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════ 底部跑马灯 ══════════ -->
+<footer class="hud-bottom" aria-hidden="true">
+  <div class="ticker">
+    <div class="ticker__track" id="ticker-track"></div>
+  </div>
+</footer>
+
+<!-- ══════════ 自定义准星 ══════════ -->
+<div class="reticle" id="reticle" aria-hidden="true">
+  <span class="reticle__ring"></span>
+  <span class="reticle__dot"></span>
+  <span class="reticle__label" id="reticle-label"></span>
+</div>
+
+<!-- ══════════ 命令终端 ══════════ -->
+<div class="term" id="term" hidden role="dialog" aria-modal="true" aria-label="命令终端">
+  <div class="term__backdrop" data-term-close></div>
+  <div class="term__panel">
+    <header class="term__bar">
+      <span class="term__title">DOSSIER&nbsp;SHELL · v2.077</span>
+      <span class="term__hint">输入 <b>help</b> 查看指令 · <b>Esc</b> 关闭</span>
+      <button class="term__x" type="button" data-term-close aria-label="关闭终端">✕</button>
+    </header>
+    <div class="term__out" id="term-out" role="log" aria-live="polite"></div>
+    <form class="term__input" id="term-form">
+      <label class="term__prompt" for="term-cmd">lm@nightcity:~$</label>
+      <input class="term__cmd" id="term-cmd" type="text" autocomplete="off" autocapitalize="off"
+             spellcheck="false" aria-label="输入命令">
+    </form>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+<noscript>
+  <div class="noscript">
+    <h2>需要启用 JavaScript</h2>
+    <p>本页面的动态背景、交互与内容渲染由 JavaScript 驱动。</p>
+    <p>邮箱：<a href="mailto:you@example.com">you@example.com</a> · GitHub：github.com/your-id · 广东</p>
+  </div>
+</noscript>
+
+<!-- ══════════ 脚本：经典 script 顺序加载，双击 index.html 即可离线运行（禁用 ES Module）══════════
+     加载顺序契约：resume(数据) → utils → registry → core/fx/ui 各模块 → app
+     · <script> 顺序只保证「文件加载顺序」；
+     · 初始化顺序由各模块的 CYBER.register(order) 统一决定（清单唯一来源是 registry）。 ══════════ -->
+<script src="js/data/resume.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/registry.js"></script>
+<script src="js/core/sound.js"></script>
+<script src="js/core/toast.js"></script>
+<script src="js/fx/background.js"></script>
+<script src="js/fx/reticle.js"></script>
+<script src="js/fx/scroll.js"></script>
+<script src="js/ui/boot.js"></script>
+<script src="js/ui/nav.js"></script>
+<script src="js/ui/hero.js"></script>
+<script src="js/ui/skills.js"></script>
+<script src="js/ui/career.js"></script>
+<script src="js/ui/works.js"></script>
+<script src="js/ui/contact.js"></script>
+<script src="js/ui/terminal.js"></script>
+<script src="js/fx/tilt.js"></script>
+<script src="js/fx/glitch.js"></script>
+<script src="js/core/hints.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

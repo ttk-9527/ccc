@@ -1,0 +1,149 @@
+/* ═══════════════════════════════════════════════════════════════
+   responsive.css — 自适应断点
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── ≤1180px：收紧栅格 ── */
+@media (max-width: 1180px) {
+  .skills-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); }
+  .hud-ruler { display: none; }
+}
+
+/* ── ≤980px：主栅格改单列 ── */
+@media (max-width: 980px) {
+  :root { --hud-h: 54px; }
+
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  /* 数据条改为 .hero 直属行后，单列下用 order 保持原堆叠顺序：正文 → 数据条 → 身份卡 */
+  .hero__main { order: 1; }
+  .stat-row { order: 2; }
+  .idcard { order: 3; }
+  .idcard { max-width: 360px; }
+
+  .skills-grid,
+  .contact-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .panel--radar { grid-column: auto; grid-row: auto; }
+  .panel--attrs { grid-column: auto; }
+
+  .hud-nav__item span { display: none; }
+  .hud-nav__item { padding: 8px 10px; }
+
+  .sect { padding: 76px 0; }
+}
+
+/* ── ≤760px：移动端导航抽屉 ── */
+@media (max-width: 760px) {
+  .hud-burger { display: flex; margin-left: auto; }
+
+  .hud-nav {
+    position: fixed;
+    top: var(--hud-h); left: 0; right: 0;
+    margin-left: 0;
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 10px var(--gutter) 18px;
+    background: rgba(4, 1, 11, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--accent);
+    clip-path: none;
+    transform: translateY(-115%);
+    /* D4：关闭态 visibility:hidden ⇒ Tab 不会进入移出视口的链接；
+       打开时立即可见，关闭时延迟到滑出动画结束再隐藏 */
+    visibility: hidden;
+    transition: transform var(--dur-4) var(--ease-snap), visibility 0s linear var(--dur-4);
+    z-index: var(--z-hud);
+  }
+  .hud-nav.is-open { transform: none; visibility: visible; transition-delay: 0s; }
+  .hud-nav__item {
+    display: flex;
+    padding: 14px 12px;
+    font-size: var(--fs-sm);
+    border-bottom: 1px dashed var(--line-soft);
+    clip-path: none;
+  }
+  .hud-nav__item span { display: inline; }
+  .hud-nav__ink { display: none; }
+
+  .hud-top { gap: 12px; }
+  .hud-clock { display: none; }
+  .hud-top__brand .brand__text i { display: none; }
+
+  .hero__name { letter-spacing: 0.01em; }
+  .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .idcard { max-width: none; }
+
+  .radar-legend { grid-template-columns: minmax(0, 1fr); }
+
+  .timeline { padding-left: 20px; }
+  .job__head { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px 15px; }
+  .job__list { padding: 14px 15px 16px; }
+
+  .filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip { flex: 0 0 auto; }
+
+  .work-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .form__foot { flex-direction: column; align-items: stretch; }
+  .btn { justify-content: center; }
+  .hero__cta .btn { flex: 1 1 auto; }
+
+  .boot__log { min-height: 128px; font-size: 11px; }
+  .term { padding-top: 12vh; }
+  .term__hint { display: none; }
+  .term__panel { max-height: 82vh; }
+}
+
+/* ── ≤480px：极窄 ── */
+@media (max-width: 480px) {
+  :root {
+    --fs-hero: clamp(2.2rem, 15vw, 3.2rem);
+    --gutter: 14px;
+  }
+  .eyebrow { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .hero__role-cn { font-size: var(--fs-md); }
+  .stat__v { font-size: var(--fs-lg); }
+  .copy-item { grid-template-columns: 38px 1fr; }
+  .copy-item__btn { grid-column: 1 / -1; }
+  .toast-stack { left: 12px; right: 12px; width: auto; }
+}
+
+/* ── 横屏矮屏 ── */
+@media (max-height: 620px) and (min-width: 761px) {
+  .sect--status { min-height: auto; padding-top: calc(var(--hud-h) + 56px); padding-bottom: 56px; }
+}
+
+/* ── 高对比度模式 ── */
+@media (forced-colors: active) {
+  .panel, .job, .work, .btn, .chip, .tool-btn { border: 1px solid CanvasText; }
+  .bar__fill, .attr__bar span, .scroll-rail__fill { background: Highlight; }
+  .glitch::before, .glitch::after { display: none; }
+}
+
+/* ── 触屏设备：禁用仅悬停生效的效果 ── */
+@media (hover: none) {
+  .work:hover .work__media img { transform: none; }
+  .ticker:hover .ticker__track { animation-play-state: running; }
+}
+
+/* ── 减弱动态效果：整套 Canvas 背景与浮层动效全部停掉
+     必须放在最后，否则会被 layout.css 的 .bg-stack canvas { display:block } 覆盖 ── */
+@media (prefers-reduced-motion: reduce) {
+  .bg-stack canvas { display: none !important; }
+  .fx-noise,
+  .fx-scanlines::after { animation: none; }
+  .ticker__track { animation: none; }
+  .idcard__scan { display: none; }
+  .glitch::before,
+  .glitch::after { display: none; }
+  .boot__enter { animation: none; }
+  * { scroll-behavior: auto; }
+}

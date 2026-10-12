@@ -1,0 +1,116 @@
+/* =================================================================
+   components/skills.css — 02 SKILLS：技能条 / 雷达容器 / 能力参数
+   由 css/components.css 按区块逐字迁移拆分（选择器与规则不改，保持原有行为）
+   死代码（.status-grid / .chan*）已按建议报告 B2 剔除，不再迁入
+/* =================================================================
+
+/* ────────── SKILLS ────────── */
+.skills-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 22px);
+}
+.panel--bars   { grid-row: span 1; }
+.panel--radar  { grid-row: span 2; grid-column: 2; }
+.panel--attrs  { grid-column: 1; }
+
+.bar-list { display: grid; gap: 15px; }
+.bar__top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  margin-bottom: 6px;
+}
+.bar__name { color: var(--ink); letter-spacing: var(--ls-mid); }
+.bar__meta { color: var(--ink-4); font-size: 9px; letter-spacing: var(--ls-wide); }
+.bar__track {
+  position: relative;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-soft);
+  overflow: hidden;
+}
+.bar__fill {
+  position: relative;
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 88%, #fff) 0%,
+    var(--accent) 42%,
+    color-mix(in srgb, var(--accent) 72%, #000) 100%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 50%, transparent);
+  transition: width 900ms var(--ease-out-hard);
+}
+/* 读数头：青色高亮点在条形末端，比整条渐变更"仪表盘" */
+.bar__fill::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 3px;
+  background: var(--cp-cyan);
+  box-shadow: 0 0 9px var(--cp-cyan);
+}
+/* 数据条上的刻度 */
+.bar__track::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 11px, rgba(0, 0, 0, 0.5) 11px 12px);
+  pointer-events: none;
+}
+
+/* 雷达图 */
+.radar-wrap { position: relative; display: grid; gap: 14px; }
+#radar-canvas {
+  width: 100%; height: auto;
+  max-width: 420px;
+  margin-inline: auto;
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.16));
+}
+.radar-legend {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 14px;
+}
+.radar-legend li {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--ink-3);
+}
+.radar-legend i {
+  width: 8px; height: 8px; flex: 0 0 auto;
+  background: var(--cp-cyan);
+}
+.radar-legend b { color: var(--ink); font-weight: 400; margin-left: auto; }
+
+/* 属性参数 */
+.attr-list { display: grid; gap: 11px; }
+.attr {
+  display: grid;
+  grid-template-columns: 50px 1fr 46px;
+  align-items: center;
+  gap: 12px;
+}
+.attr__k {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: var(--ls-wide);
+  color: var(--accent);
+}
+.attr__bar {
+  position: relative;
+  height: 16px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.09) 0 7px, transparent 7px 9px);
+  border: 1px solid var(--line-soft);
+}
+.attr__bar span {
+  position: absolute; inset: 0 auto 0 0;
+  width: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, transparent), var(--accent));
+  transition: width 1100ms var(--ease-out-hard);
+}
+.attr__v {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  text-align: right;
+}

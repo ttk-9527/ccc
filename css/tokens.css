@@ -1,0 +1,133 @@
+/* ═══════════════════════════════════════════════════════════════
+   tokens.css — 赛博朋克 2077 设计令牌
+   配色 / 字体 / 字号阶梯 / 切角 / 缓动 / 层级 / 动效节奏
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 品牌三元色：黄 为主，青 为交互，红 为危险 ── */
+  --cp-yellow:  #fcee0a;
+  --cp-cyan:    #00f0ff;
+  --cp-red:     #ff003c;
+  --cp-magenta: #ff2ad4;
+  --cp-lime:    #9bff00;
+  --cp-amber:   #ff9a00;
+
+  /* ── 背景梯度：近黑紫，共 5 级 ── */
+  --bg-0: #04010b;
+  --bg-1: #0a0418;
+  --bg-2: #120726;
+  --bg-3: #1c0b3a;
+  --bg-4: #27104f;
+
+  /* ── 文字 ── */
+  --ink:   #eae8f4;
+  --ink-2: #b0a9cf;
+  --ink-3: #7d76a1;
+  --ink-4: #857eb0;         /* D2：对 #0a0418 对比度 ≈5.4:1（原 #514b70 仅 2.5:1，不达 AA） */
+
+  /* ── 描边 / 分割 ── */
+  --line:        rgba(122, 118, 180, 0.22);
+  --line-soft:   rgba(122, 118, 180, 0.12);
+  --line-strong: rgba(0, 240, 255, 0.45);
+
+  /* ── 面板 ── */
+  --panel-bg:     linear-gradient(160deg, rgba(28, 11, 58, 0.72) 0%, rgba(10, 4, 24, 0.86) 100%);
+  --panel-bg-alt: linear-gradient(160deg, rgba(18, 7, 38, 0.9) 0%, rgba(6, 2, 16, 0.94) 100%);
+  --panel-blur:   blur(6px);
+
+  /* ── 强调色（可切换：yellow | cyan | red）── */
+  --accent:      var(--cp-yellow);
+  --accent-ink:  #100c00;         /* 强调色上的文字 */
+  --accent-soft: rgba(252, 238, 10, 0.16);
+
+  /* ── 字体 ── */
+  --font-display: 'Orbitron', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-body:    'Rajdhani', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono:    'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, 'Noto Sans SC', monospace;
+
+  /* ── 字号阶梯（含流式标题）── */
+  --fs-2xs: 0.6875rem;  /* 11px  HUD 微标 */
+  --fs-xs:  0.75rem;    /* 12px  标签 */
+  --fs-sm:  0.875rem;   /* 14px  辅助 */
+  --fs-md:  1rem;       /* 16px  正文 */
+  --fs-lg:  1.1875rem;  /* 19px  小标题 */
+  --fs-xl:  1.5rem;     /* 24px  区块标题 */
+  --fs-2xl: clamp(1.9rem, 3.4vw, 2.75rem);
+  --fs-hero: clamp(2.75rem, 8.5vw, 7rem);
+
+  /* ── 字距 ── */
+  --ls-hud:  0.22em;
+  --ls-wide: 0.12em;
+  --ls-mid:  0.06em;
+
+  /* ── 切角（CP2077 招牌斜切）── */
+  --notch-s: 6px;
+  --notch-m: 12px;
+  --notch-l: 22px;
+  --cut-tl: polygon(var(--notch-m) 0, 100% 0, 100% 100%, 0 100%, 0 var(--notch-m));
+  --cut-tr: polygon(0 0, calc(100% - var(--notch-m)) 0, 100% var(--notch-m), 100% 100%, 0 100%);
+  --cut-bl: polygon(0 0, 100% 0, 100% 100%, var(--notch-m) 100%, 0 calc(100% - var(--notch-m)));
+  --cut-br: polygon(0 0, 100% 0, 100% calc(100% - var(--notch-m)), calc(100% - var(--notch-m)) 100%, 0 100%);
+  /* 批次3-G：双角切（右上+左下），CP2077 面板招牌语言 */
+  --cut-tr-bl: polygon(0 0, calc(100% - var(--notch-m)) 0, 100% var(--notch-m), 100% 100%, var(--notch-m) 100%, 0 calc(100% - var(--notch-m)));
+  --cut-bar: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+
+  /* ── 缓动：CP2077 不用柔和 ease-in-out ── */
+  --ease-snap:   cubic-bezier(0.2, 0.9, 0.1, 1);
+  --ease-in-hard: cubic-bezier(0.7, 0, 0.9, 0.4);
+  --ease-out-hard: cubic-bezier(0.1, 1, 0.3, 1);
+
+  /* ── 时长 ── */
+  --dur-1: 80ms;
+  --dur-2: 140ms;
+  --dur-3: 220ms;
+  --dur-4: 380ms;
+  --dur-5: 620ms;
+
+  /* ── 层级 ── */
+  --z-bg:      1;
+  --z-fx:      2;
+  --z-content: 10;
+  --z-hud:     40;
+  --z-frame:   45;
+  --z-reticle: 60;
+  --z-term:    80;
+  --z-boot:    90;
+  --z-toast:   95;
+
+  /* ── 尺寸 ── */
+  --hud-h: 58px;
+  --ticker-h: 30px;
+  --wrap: 1240px;
+  --gutter: clamp(16px, 4vw, 48px);
+
+  /* ── 发光 ── */
+  --glow-accent: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
+                 0 0 24px color-mix(in srgb, var(--accent) 26%, transparent);
+  --glow-cyan:   0 0 8px rgba(0, 240, 255, 0.55), 0 0 24px rgba(0, 240, 255, 0.22);
+  --shadow-panel: 0 18px 48px -22px rgba(0, 0, 0, 0.9), inset 0 0 0 1px var(--line-soft);
+}
+
+/* ═══ 主题强调色切换 ═══ */
+html[data-accent="yellow"] {
+  --accent: var(--cp-yellow);
+  --accent-ink: #100c00;
+  --accent-soft: rgba(252, 238, 10, 0.16);
+}
+html[data-accent="cyan"] {
+  --accent: var(--cp-cyan);
+  --accent-ink: #001016;
+  --accent-soft: rgba(0, 240, 255, 0.16);
+}
+html[data-accent="red"] {
+  --accent: var(--cp-red);
+  --accent-ink: #1a0008;
+  --accent-soft: rgba(255, 0, 60, 0.16);
+}
+
+/* ═══ 降低动态效果 ═══ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; --dur-4: 0ms; --dur-5: 0ms;
+  }
+}

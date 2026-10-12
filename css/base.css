@@ -1,0 +1,159 @@
+/* ═══════════════════════════════════════════════════════════════
+   base.css — 重置、排版、可访问性基线
+   ═══════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--hud-h) + 16px);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* hidden 属性必须赢过任何作者样式的 display 声明（否则空数据占位逻辑失效） */
+[hidden] { display: none !important; }
+
+/* 滚动条 */
+* { scrollbar-width: thin; scrollbar-color: var(--accent) var(--bg-1); }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: var(--bg-1); }
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--accent), var(--cp-cyan));
+  border: 2px solid var(--bg-1);
+}
+
+/* ── 排版 ── */
+h1, h2, h3, h4, p, figure, dl, dd, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+img, canvas, svg, video { display: block; max-width: 100%; }
+img { height: auto; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: var(--ls-mid);
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+
+/* ── 焦点可见性（WCAG 2.4.7）── */
+:where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--cp-cyan);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* 启动序列结束后由脚本把焦点移到 <main>，这里不要画出焦点框 */
+#main:focus,
+#main:focus-visible { outline: none; }
+
+/* ── 选中文本 ── */
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+/* ── 跳转链接 ── */
+.skip-link {
+  position: fixed; top: 8px; left: 50%;
+  transform: translate(-50%, -200%);
+  z-index: var(--z-toast);
+  padding: 10px 18px;
+  background: var(--accent); color: var(--accent-ink);
+  font-family: var(--font-mono); font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide); text-transform: uppercase;
+  clip-path: var(--cut-br);
+  transition: transform var(--dur-2) var(--ease-snap);
+}
+.skip-link:focus { transform: translate(-50%, 0); }
+
+/* ── 通用文本工具 ── */
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: var(--ls-mid);
+}
+.hud-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-hud);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.accent { color: var(--accent); }
+.cyan { color: var(--cp-cyan); }
+
+.linkish {
+  background: none; border: 0; padding: 0;
+  color: var(--cp-cyan);
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+}
+.linkish:hover { color: var(--accent); }
+
+/* ── 通用关键帧（跨区块复用，统一位于最早加载的基线文件）──
+   blink  : HUD 时钟 · 身份卡状态灯   fadeIn : 终端遮罩等淡入
+   各区块专属关键帧仍留在其区块文件内（glitchA/B、caretBlink、idScan…） */
+@keyframes blink { 50% { opacity: 0.25; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── 屏幕阅读器专用 ── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
+/* ── noscript ── */
+.noscript {
+  position: relative; z-index: var(--z-toast);
+  max-width: 620px; margin: 18vh auto; padding: 28px;
+  border: 1px solid var(--accent);
+  background: var(--bg-1);
+  clip-path: var(--cut-br);
+}
+.noscript h2 { color: var(--accent); font-size: var(--fs-xl); margin-bottom: 12px; }
+.noscript a { color: var(--cp-cyan); border-bottom: 1px solid currentColor; }
+
+/* ── 无 JS 时隐藏依赖 JS 的元素 ── */
+.no-js .boot,
+.no-js .reticle,
+.no-js .hud-nav__ink { display: none; }
+
+/* ── 站长向提示（字段填法/开发说明）：默认对访客隐藏，URL 加 ?edit=1 展开 ──
+   html.edit-mode 由 index.html 头部内联脚本按 location.search 设置 */
+.owner-hint { display: none; }
+html.edit-mode .owner-hint { display: revert; }
+
+/* ── 滚动揭示的初始态（由 js/fx/scroll.js 接管）── */
+.js-reveal [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity var(--dur-4) var(--ease-out-hard),
+    transform var(--dur-4) var(--ease-out-hard);
+  will-change: opacity, transform;
+}
+.js-reveal [data-reveal].is-in { opacity: 1; transform: none; }
+
+/* 减弱动效时不做位移揭示 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js-reveal [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .bg-stack canvas { display: none; }
+}

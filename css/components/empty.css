@@ -1,0 +1,87 @@
+/* =================================================================
+   components/empty.css — 数据缺失占位（诚实状态，不编造内容）
+   由 css/components.css 按区块逐字迁移拆分（选择器与规则不改，保持原有行为）
+   死代码（.status-grid / .chan*）已按建议报告 B2 剔除，不再迁入
+/* =================================================================
+
+/* ═══════════════════════════════════════════════════════════════
+   数据缺失占位（不使用编造内容时的诚实状态）
+   ═══════════════════════════════════════════════════════════════ */
+.empty-state {
+  position: relative;
+  max-width: 760px; /* 封存态只有徽章+标题，全宽会显得空 */
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px dashed color-mix(in srgb, var(--accent) 42%, transparent);
+  background: linear-gradient(160deg, var(--accent-soft) 0%, rgba(6, 2, 16, 0.92) 62%);
+  clip-path: var(--cut-br);
+}
+/* Quick Win #5：CLASSIFIED 橡皮图章（旋转压制，档案感彩蛋） */
+.empty-state::after {
+  content: 'CLASSIFIED';
+  position: absolute;
+  top: 14px; right: 22px;
+  padding: 2px 12px;
+  border: 3px solid rgba(255, 0, 60, 0.4);
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 0, 60, 0.65);
+  font-family: var(--font-display);
+  font-size: clamp(16px, 2vw, 24px);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+.empty-state__code {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-hud);
+  padding: 4px 9px;
+  background: var(--cp-red);
+  color: #fff;
+  margin-bottom: 13px;
+  clip-path: var(--cut-bar);
+}
+.empty-state__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: var(--ls-mid);
+  color: var(--ink);
+  margin-bottom: 9px;
+}
+.empty-state__desc {
+  max-width: 74ch;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  line-height: 1.8;
+}
+.empty-state__desc code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--accent);
+  padding: 1px 5px;
+  background: rgba(4, 1, 11, 0.7);
+  border: 1px solid var(--line);
+}
+.empty-state__snippet {
+  margin-top: 15px;
+  padding: 13px 15px;
+  background: rgba(4, 1, 11, 0.78);
+  border-left: 2px solid var(--cp-cyan);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  line-height: 1.95;
+  color: var(--cp-cyan);
+  white-space: pre;
+  overflow-x: auto;
+}
+/* 批次3：?edit=1 时代码示例「打字机式」左→右揭示（steps 分段，reduced-motion 跳过） */
+html.edit-mode .empty-state__snippet { animation: snippetType 900ms steps(48, end) 1 both; }
+@keyframes snippetType {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.edit-mode .empty-state__snippet { animation: none; }
+}

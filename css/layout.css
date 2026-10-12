@@ -1,0 +1,456 @@
+/* ═══════════════════════════════════════════════════════════════
+   layout.css — 背景层、HUD 框架、导航、区块骨架
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ────────── 动态背景 ────────── */
+.bg-stack {
+  position: fixed; inset: 0;
+  z-index: var(--z-bg);
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-stack canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out-hard);
+}
+.bg-stack.is-live canvas { opacity: 1; }
+
+/* 顶部霓虹雾 + 底部地平线辉光 */
+.bg-gradient {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(255, 42, 212, 0.16) 0%, transparent 58%),
+    radial-gradient(90% 50% at 12% 12%,  rgba(0, 240, 255, 0.10) 0%, transparent 60%),
+    radial-gradient(140% 60% at 50% 108%, rgba(252, 238, 10, 0.10) 0%, transparent 62%),
+    linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 44%, var(--bg-2) 100%);
+}
+
+/* ────────── CRT 叠加层（已迁移至 fx.css：特效归特效文件）────────── */
+
+/* ────────── HUD 边角框架 ────────── */
+.hud-frame {
+  position: fixed; inset: 0;
+  z-index: var(--z-frame);
+  pointer-events: none;
+  margin: 10px;
+}
+.hud-corner {
+  position: absolute;
+  width: 26px; height: 26px;
+  border: 2px solid var(--accent);
+  opacity: 0.55;
+  transition: opacity var(--dur-3) var(--ease-snap);
+}
+.hud-corner--tl { top: 0; left: 0;      border-right: 0; border-bottom: 0; }
+.hud-corner--tr { top: 0; right: 0;     border-left: 0;  border-bottom: 0; }
+.hud-corner--bl { bottom: 0; left: 0;   border-right: 0; border-top: 0; }
+.hud-corner--br { bottom: 0; right: 0;  border-left: 0;  border-top: 0; }
+.hud-frame.is-hot .hud-corner { opacity: 1; }
+
+/* 左右刻度尺 */
+.hud-ruler {
+  position: absolute; top: 12%; bottom: 12%;
+  width: 5px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--line-strong) 0 1px,
+    transparent 1px 14px
+  );
+  opacity: 0.32;
+}
+.hud-ruler--l { left: 0; }
+.hud-ruler--r { right: 0; }
+/* 批次3-F：右缘竖排 HUD 代码（纯装饰；≤1359px 收起避免贴到内容，打印随框架隐藏） */
+.hud-side-code {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-4);
+  opacity: 0.5;
+}
+@media (max-width: 1359px) { .hud-side-code { display: none; } }
+
+/* ────────── 顶部 HUD 导航 ────────── */
+.hud-top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: var(--z-hud);
+  height: var(--hud-h);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 var(--gutter);
+  /* 背景渐变底部不再收口到透明：否则下缘露出的区块内容（如首屏 DOSSIER 眉头）
+     会透过半透明+模糊层与品牌行叠在一起（用户反馈的「重叠」）。
+     顶部保留轻微通透，底部实心化，保证任何滚动位置下 HUD 下缘都无内容透出 */
+  background: linear-gradient(180deg, rgba(4, 1, 11, 0.94) 0%, rgba(4, 1, 11, 0.97) 72%, rgba(4, 1, 11, 1) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line-soft);
+  transition: transform var(--dur-4) var(--ease-snap);
+}
+.hud-top.is-hidden { transform: translateY(-100%); }
+/* D4：键盘焦点进入 HUD 时强制展开，自动收起态不把焦点藏到屏幕外
+   （与 .is-hidden 同特异性，写在其后以生效） */
+.hud-top:focus-within { transform: none; }
+
+.hud-top__brand {
+  display: flex; align-items: center; gap: 10px;
+  flex: 0 0 auto;
+}
+.brand__mark {
+  color: var(--accent);
+  font-size: 1.5rem; line-height: 1;
+  text-shadow: var(--glow-accent);
+}
+.brand__text { display: flex; flex-direction: column; line-height: 1.05; }
+.brand__text b {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 900;
+  letter-spacing: var(--ls-wide);
+}
+.brand__text i {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-3);
+}
+
+/* 导航条 */
+.hud-nav {
+  position: relative;
+  display: flex; align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  height: 100%;
+}
+.hud-nav__item {
+  position: relative;
+  display: flex; align-items: baseline; gap: 7px;
+  padding: 8px 13px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--ink-2);
+  transition: color var(--dur-2) var(--ease-snap), background var(--dur-2) var(--ease-snap);
+  clip-path: var(--cut-bar);
+}
+.hud-nav__item em {
+  font-style: normal;
+  font-size: 9px;
+  color: var(--ink-4);
+  transition: color var(--dur-2) var(--ease-snap);
+}
+.hud-nav__item:hover { color: var(--ink); background: rgba(255, 255, 255, 0.045); }
+.hud-nav__item:hover em { color: var(--cp-cyan); }
+.hud-nav__item.is-active { color: var(--accent); background: var(--accent-soft); }
+.hud-nav__item.is-active em { color: var(--accent); }
+
+/* 导航游标 */
+.hud-nav__ink {
+  position: absolute; bottom: 0; left: 0;
+  height: 2px; width: 0;
+  background: var(--accent);
+  box-shadow: var(--glow-accent);
+  transition: transform var(--dur-3) var(--ease-snap), width var(--dur-3) var(--ease-snap);
+  pointer-events: none;
+}
+
+/* 工具按钮 */
+.hud-top__tools {
+  display: flex; align-items: center; gap: 7px;
+  flex: 0 0 auto;
+}
+.tool-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+  min-width: 32px; height: 30px; padding: 0 9px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-mid);
+  cursor: pointer;
+  clip-path: var(--cut-br);
+  transition: all var(--dur-2) var(--ease-snap);
+}
+.tool-btn:hover {
+  color: var(--bg-0); background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--glow-accent);
+}
+.tool-btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.tool-btn[aria-pressed="true"]:hover { color: var(--bg-0); }
+.tool-btn--wide { letter-spacing: 0; }
+.tool-btn__dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.tool-btn:hover .tool-btn__dot { background: var(--bg-0); box-shadow: none; }
+
+.hud-clock {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-mid);
+  color: var(--ink-3);
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+  min-width: 66px;
+  text-align: right;
+}
+/* @keyframes blink 已迁移至 base.css（通用关键帧归基线文件，hud-clock 与身份卡共用） */
+.hud-clock::after {
+  content: '●';
+  font-size: 7px;
+  color: var(--cp-red);
+  margin-left: 5px;
+  vertical-align: middle;
+  animation: blink 1.2s steps(1) infinite;
+}
+
+/* 汉堡（移动端） */
+.hud-burger {
+  display: none;
+  width: 34px; height: 30px;
+  background: transparent; border: 1px solid var(--line);
+  cursor: pointer; padding: 0;
+  flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.hud-burger span {
+  display: block; width: 16px; height: 2px;
+  background: var(--accent);
+  transition: transform var(--dur-2) var(--ease-snap), opacity var(--dur-2);
+}
+.hud-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.hud-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.hud-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ────────── 滚动进度轨 ────────── */
+.scroll-rail {
+  position: fixed;
+  top: var(--hud-h); left: 0; right: 0;
+  height: 2px;
+  z-index: var(--z-hud);
+  background: rgba(255, 255, 255, 0.05);
+}
+.scroll-rail__fill {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--cp-cyan), var(--accent), var(--cp-red));
+  box-shadow: 0 0 10px var(--accent);
+  transition: width 90ms linear;
+}
+
+/* ────────── 内容容器与区块 ────────── */
+.wrap {
+  position: relative;
+  z-index: var(--z-content);
+  width: min(100% - (var(--gutter) * 2), var(--wrap));
+  margin-inline: auto;
+}
+
+main {
+  position: relative;
+  z-index: var(--z-content);
+  /* 底部固定跑马灯会盖住内容，预留出它的高度 */
+  padding-bottom: calc(var(--ticker-h) + 10px);
+}
+
+.sect {
+  position: relative;
+  padding: clamp(72px, 11vh, 132px) 0;
+}
+.sect--status {
+  /* 首屏高度扣掉顶部 HUD 与底部跑马灯，避免出现"差 30px 滚不动"的别扭感 */
+  min-height: calc(100vh - var(--hud-h) - var(--ticker-h));
+  min-height: calc(100svh - var(--hud-h) - var(--ticker-h));
+  display: flex; align-items: center;
+  /* 顶部内边距下限抬到 HUD 高度+20px：内容高过视口（不能垂直居中）时，
+     眉头行也不会钻进固定顶栏底下（用户反馈的「重叠」根因之二） */
+  padding-top: max(clamp(28px, 5vh, 56px), calc(var(--hud-h) + 20px));
+  padding-bottom: clamp(28px, 5vh, 56px);
+}
+
+/* 区块装饰背景
+   远程图片先被紫色渐变 multiply 成双色调，再以 screen 叠加成雾气。
+   直接 luminosity 混合会把照片压成脏褐色，所以这里刻意不用。 */
+.sect__bg {
+  position: absolute; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: screen;
+  filter: saturate(0.85) contrast(1.2);
+  opacity: 0.30;
+  mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+}
+.sect__bg--hero {
+  background-image:
+    linear-gradient(180deg, rgba(104, 14, 140, 0.94), rgba(18, 4, 46, 0.97)),
+    url("https://images.unsplash.com/photo-1545972154-9bb223aac798?w=1920&q=72&fm=webp&fit=crop");
+  background-blend-mode: multiply;
+}
+.sect__bg--circuit {
+  background-image:
+    linear-gradient(180deg, rgba(10, 62, 128, 0.94), rgba(6, 4, 40, 0.97)),
+    url("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1920&q=64&fm=webp&fit=crop");
+  background-blend-mode: multiply;
+  opacity: 0.22;
+}
+
+/* 区块标题 */
+.sect__head { position: relative; margin-bottom: clamp(30px, 5vw, 54px); }
+/* 区块幽灵编号：超大描边数字沉在标题右侧，制造区块节奏（桌面端装饰，<980px 隐藏） */
+.sect__ghost {
+  position: absolute;
+  top: -0.22em;
+  right: 0;
+  z-index: -1;
+  font-family: var(--font-display);
+  font-size: clamp(88px, 11vw, 168px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: var(--ls-wide);
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(252, 238, 10, 0.16);
+  user-select: none;
+  pointer-events: none;
+}
+@media (max-width: 979px) { .sect__ghost { display: none; } }
+.sect__idx {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-hud);
+  color: var(--cp-cyan);
+  margin-bottom: 12px;
+}
+/* 批次2-E：区块编号后的危险斜纹标记（黄黑45° tape，装饰） */
+.sect__idx::after {
+  content: '';
+  display: inline-block;
+  width: 64px;
+  height: 9px;
+  margin-left: 14px;
+  vertical-align: 0px;
+  background: repeating-linear-gradient(45deg, var(--accent) 0 7px, transparent 7px 14px);
+  opacity: 0.75;
+  pointer-events: none;
+}
+.sect__title {
+  font-size: var(--fs-2xl);
+  color: var(--ink);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.sect__sub {
+  max-width: 62ch;
+  color: var(--ink-2);
+  font-size: var(--fs-md);
+}
+
+/* 区块中文副标题（大写拉丁主标题下面那行） */
+.sect__cn {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+/* ────────── 区块内的小节（竖条 + 中文标题 + 灰色备注）────────── */
+.block { margin-top: clamp(30px, 4.5vw, 54px); }
+
+.block__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.block__bar {
+  flex: 0 0 auto;
+  width: 4px; height: 20px;
+  background: var(--accent);
+  box-shadow: var(--glow-accent);
+  /* 左下切角，避免死板的方块 */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+}
+.block__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: var(--ls-mid);
+  color: var(--ink);
+}
+.block__sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--ink-4);
+}
+
+/* 引导语 */
+.eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 26px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+}
+.eyebrow__tag {
+  padding: 4px 10px;
+  background: var(--accent); color: var(--accent-ink);
+  font-weight: 700;
+  clip-path: var(--cut-bar);
+}
+.eyebrow__txt { color: var(--ink-3); }
+
+/* ────────── 底部跑马灯 ────────── */
+.hud-bottom {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--ticker-h);
+  z-index: var(--z-hud);
+  background: rgba(4, 1, 11, 0.97);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-top: 1px solid var(--accent);
+  box-shadow: 0 -12px 26px -18px var(--accent);
+  overflow: hidden;
+  display: flex; align-items: center;
+}
+.ticker { width: 100%; overflow: hidden; }
+.ticker__track {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: tickerRun 46s linear infinite;
+}
+.ticker__track span {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-3);
+  padding-right: 34px;
+  text-transform: uppercase;
+}
+.ticker__track b { color: var(--accent); font-weight: 400; }
+.ticker__track i { color: var(--cp-red); font-style: normal; }
+@keyframes tickerRun {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.ticker:hover .ticker__track { animation-play-state: paused; }

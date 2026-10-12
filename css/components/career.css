@@ -1,0 +1,193 @@
+/* =================================================================
+   components/career.css — 03 CAREER：时间线 / 条目（可复用条目组件）/ 徽章 / 荣誉奖项 / 教育条
+   由 css/components.css 按区块逐字迁移拆分（选择器与规则不改，保持原有行为）
+   死代码（.status-grid / .chan*）已按建议报告 B2 剔除，不再迁入
+/* =================================================================
+
+/* ────────── CAREER 时间线 ────────── */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  display: grid;
+  gap: 14px;
+}
+.timeline::before {
+  content: '';
+  position: absolute; left: 5px; top: 10px; bottom: 10px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--cp-cyan) 42%, rgba(0, 240, 255, 0.05) 100%);
+  opacity: 0.7;
+}
+
+/* 外层行：负责画时间轴节点，不受 .job 的 clip-path 影响 */
+.job-row { position: relative; }
+.job-row::before {
+  content: '';
+  position: absolute;
+  left: -28px; top: 24px;
+  width: 11px; height: 11px;
+  background: var(--bg-0);
+  border: 2px solid var(--accent);
+  box-shadow: var(--glow-accent);
+  transform: rotate(45deg);
+  transition: background var(--dur-3) var(--ease-snap), transform var(--dur-3) var(--ease-snap);
+}
+.job-row.is-open::before { background: var(--accent); }
+
+.job {
+  position: relative;
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  clip-path: var(--cut-tr);
+  transition: border-color var(--dur-3) var(--ease-snap), background var(--dur-3) var(--ease-snap);
+}
+.job:hover, .job-row.is-open .job { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+
+/* 条目头：第一行「日期 + 徽章 + 动作链接」，第二行「图标 + 标题」 */
+.job__head {
+  width: 100%;
+  display: grid;
+  gap: 12px;
+  padding: 16px 20px;
+  background: none; border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.job__head:hover .job__co { color: var(--accent); }
+.job__main {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.job__co {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: var(--ls-mid);
+  color: var(--ink);
+  transition: color var(--dur-2) var(--ease-snap);
+}
+.job__role {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-mid);
+  color: var(--cp-cyan);
+}
+
+.job__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-4) var(--ease-snap);
+}
+.job-row.is-open .job__body { grid-template-rows: 1fr; }
+.job__inner { overflow: hidden; }
+.job__list {
+  padding: 2px 20px 20px 20px;
+  display: grid; gap: 9px;
+  border-top: 1px dashed var(--line);
+  margin: 0 0 0 0;
+  padding-top: 16px;
+}
+.job__list li {
+  position: relative;
+  padding-left: 20px;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+.job__list li::before {
+  content: '▸';
+  position: absolute; left: 0;
+  color: var(--accent);
+}
+
+/* 教育条 */
+.edu-strip {
+  margin-top: 26px;
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.025);
+  border-left: 3px solid var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+}
+.edu-strip__k { color: var(--ink-4); letter-spacing: var(--ls-hud); }
+.edu-strip__v { color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════════════════
+   相关经历 · 徽章 / 动作链接 / 条目标题
+   （可复用条目组件：data 数组 → buildItem() → timeline 容器 → emptyState 兜底）
+   ═══════════════════════════════════════════════════════════════ */
+.tl-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-wide);
+  padding: 4px 9px;
+  white-space: nowrap;
+  clip-path: var(--cut-bar);
+}
+.tl-badge--lead   { background: var(--accent);  color: var(--accent-ink); box-shadow: var(--glow-accent); }
+.tl-badge--senior { background: var(--cp-cyan); color: #001016; }
+.tl-badge--normal { background: transparent; color: var(--cp-cyan); box-shadow: inset 0 0 0 1px var(--cp-cyan); }
+.tl-badge--intern { background: transparent; color: var(--ink-3);  box-shadow: inset 0 0 0 1px var(--line); }
+
+.tl-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.tl-action__txt { border-bottom: 1px solid currentColor; }
+.tl-action svg { transition: transform var(--dur-2) var(--ease-snap); }
+.job-row.is-open .tl-action svg { transform: rotate(90deg); }
+
+/* 条目主体：图标 + 标题两行 */
+.job__ico {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  clip-path: var(--cut-br);
+}
+.job__text { display: grid; gap: 3px; min-width: 0; }
+.job__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.job__days {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--cp-cyan);
+  padding: 4px 9px;
+  border: 1px solid rgba(0, 240, 255, 0.32);
+  background: rgba(0, 240, 255, 0.07);
+  white-space: nowrap;
+}
+
+/* ────────── 荣誉奖项：与工作经历共用版式，只换节点与色调 ────────── */
+.job--award { clip-path: var(--cut-tr); }
+.job--award .job__co { font-size: var(--fs-md); }
+.job__head--static { cursor: default; }
+.job__head--static:hover .job__co { color: var(--ink); }
+
+.timeline--award::before {
+  background: linear-gradient(180deg, var(--cp-magenta) 0%, var(--accent) 45%, rgba(252, 238, 10, 0.05) 100%);
+}
+.job-row--award::before { border-color: var(--cp-magenta); box-shadow: 0 0 8px var(--cp-magenta); }
+
+.award__link { display: inline-flex; margin-left: auto; color: inherit; }
+.award__link:hover .tl-action__txt { color: var(--accent); }
+.tl-action--todo { cursor: pointer; color: var(--ink-3); }
+.tl-action--todo .tl-action__txt { border-bottom-style: dashed; }
+.tl-action--todo:hover { color: var(--cp-amber); }

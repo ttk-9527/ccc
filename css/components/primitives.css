@@ -1,0 +1,227 @@
+/* =================================================================
+   components/primitives.css — 通用基件：面板 / 故障文字 / 按钮
+   由 css/components.css 按区块逐字迁移拆分（选择器与规则不改，保持原有行为）
+   死代码（.status-grid / .chan*）已按建议报告 B2 剔除，不再迁入
+/* =================================================================
+
+/* ────────── 面板 ────────── */
+.panel {
+  position: relative;
+  padding: clamp(18px, 2.4vw, 30px);
+  background: var(--panel-bg);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--line);
+  clip-path: var(--cut-tr-bl);   /* 批次3-G：双角切（右上+左下） */
+  box-shadow: var(--shadow-panel);
+  transition: border-color var(--dur-3) var(--ease-snap), transform var(--dur-3) var(--ease-snap);
+}
+.panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 46px; height: 3px;
+  background: var(--accent);
+  box-shadow: var(--glow-accent);
+}
+.panel:hover { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+/* Quick Win #3：面板右上角元数据小字（装饰性 HUD 语言，避开 cut-tr 切角） */
+.panel::after {
+  content: 'SN-2.077 · ENC: AES-256';
+  position: absolute;
+  top: 11px; right: 20px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-4);
+  opacity: 0.6;
+  pointer-events: none;
+}
+/* 批次2-C：面板唤醒——标题条从左扫入 + 边框青光亮起（仅 .js-reveal 生效，reduced-motion 自动跳过）
+   批次3-A：叠加马赛克解码入场（steps(4) 分级去模糊，块状「信号调谐」感） */
+.js-reveal .panel[data-reveal]::before { transform-origin: left; }
+.js-reveal .panel[data-reveal].is-in::before { animation: barSweep 640ms var(--ease-out-hard) 1; }
+.js-reveal .panel[data-reveal].is-in {
+  animation:
+    panelWake 720ms var(--ease-out-hard) 1,
+    mosaicIn 560ms steps(4, end) 1;
+}
+@keyframes barSweep { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes panelWake {
+  0%   { border-color: var(--cp-cyan); box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.45), var(--shadow-panel); }
+  100% { border-color: var(--line); box-shadow: var(--shadow-panel); }
+}
+@keyframes mosaicIn {
+  0%   { opacity: 0; filter: blur(10px); transform: translateX(-6px); }
+  35%  { opacity: 1; filter: blur(6px);  transform: translateX(4px); }
+  70%  { filter: blur(3px); transform: translateX(-2px); }
+  100% { filter: none; transform: none; }
+}
+/* 批次3-B：揭示时青色扫描带自上而下扫过面板（scroll.js spawnPanelScan 注入，动画end自删） */
+.panel__scan {
+  position: absolute;
+  left: 0; right: 0;
+  top: -14%;
+  height: 46px;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(0, 240, 255, 0) 0%,
+    rgba(0, 240, 255, 0.12) 45%,
+    rgba(0, 240, 255, 0.55) 50%,
+    rgba(0, 240, 255, 0.12) 55%,
+    rgba(0, 240, 255, 0) 100%);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+  animation: scanSweep 760ms var(--ease-out-hard) 1 forwards;
+}
+@keyframes scanSweep { from { top: -14%; } to { top: 112%; } }
+
+.panel__title {
+  display: flex; align-items: center; gap: 10px;
+  position: relative;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
+}
+/* 批次3-D：标题行右端点阵渐隐（dot-matrix 角落装饰） */
+.panel__title::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 118px; height: 20px;
+  pointer-events: none;
+  opacity: 0.5;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 60%, transparent) 1px, transparent 1.7px) right center / 6px 6px repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000);
+  mask-image: linear-gradient(90deg, transparent, #000);
+}
+.panel__idx {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: var(--ls-hud);
+  color: var(--accent-ink);
+  background: var(--accent);
+  padding: 3px 6px;
+  clip-path: var(--cut-bar);
+}
+.panel__note {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  line-height: 1.7;
+  color: var(--ink-4);
+}
+.panel__body { color: var(--ink-2); }
+.panel__body p + p { margin-top: 10px; }
+.panel__body strong { color: var(--ink); font-weight: 600; }
+
+/* ────────── 故障文字 ────────── */
+.glitch { position: relative; display: inline-block; }
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.glitch::before {
+  color: var(--cp-red);
+  animation: glitchA 3.4s steps(1) infinite;
+}
+.glitch::after {
+  color: var(--cp-cyan);
+  animation: glitchB 2.9s steps(1) infinite;
+}
+@keyframes glitchA {
+  0%, 84%, 100% { transform: none; opacity: 0; clip-path: inset(0 0 100% 0); }
+  85% { transform: translate(-4px, -2px); opacity: 0.9; clip-path: inset(6% 0 62% 0); }
+  88% { transform: translate(3px, 1px);  opacity: 0.9; clip-path: inset(48% 0 24% 0); }
+  91% { transform: translate(-2px, 2px); opacity: 0.75; clip-path: inset(72% 0 8% 0); }
+  94% { transform: none; opacity: 0; }
+}
+@keyframes glitchB {
+  0%, 76%, 100% { transform: none; opacity: 0; clip-path: inset(0 0 100% 0); }
+  78% { transform: translate(4px, 2px);  opacity: 0.85; clip-path: inset(18% 0 56% 0); }
+  82% { transform: translate(-3px, -1px); opacity: 0.85; clip-path: inset(60% 0 14% 0); }
+  86% { transform: none; opacity: 0; }
+}
+/* 悬停时高频故障 */
+.glitch:hover::before { animation-duration: 0.5s; }
+.glitch:hover::after  { animation-duration: 0.42s; }
+/* 批次2-A：解密入场期间暂停色差伪层（scroll.js decodeTitle 加类），避免伪层与乱码打架 */
+.glitch.is-decoding::before,
+.glitch.is-decoding::after { animation: none; opacity: 0; }
+
+/* ────────── 按钮 ────────── */
+.btn {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 12px 22px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+  clip-path: var(--cut-br);
+  transition: color var(--dur-2) var(--ease-snap), box-shadow var(--dur-2) var(--ease-snap);
+}
+.btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent);
+  transform: translateX(-101%);
+  transition: transform var(--dur-3) var(--ease-snap);
+  z-index: -1;
+}
+.btn > * { position: relative; }
+.btn:hover, .btn:focus-visible { color: var(--accent-ink); box-shadow: var(--glow-accent); }
+.btn:hover::before, .btn:focus-visible::before { transform: translateX(0); }
+.btn:active { transform: translateY(1px); }
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  box-shadow: var(--glow-accent);
+}
+.btn--primary::before { background: var(--cp-cyan); }
+.btn--primary:hover, .btn--primary:focus-visible { color: #001016; }
+
+.btn--ghost { border-color: var(--line-strong); color: var(--ink); }
+.btn--ghost::before { background: var(--accent); }
+.btn__arrow { transition: transform var(--dur-2) var(--ease-snap); }
+.btn:hover .btn__arrow { transform: translateX(4px); }
+.btn__kbd {
+  font-size: 9px;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+}
+
+/* Quick Win #1：按钮悬停/聚焦时顶角括号收拢（currentColor 随按钮态变色） */
+.btn::after {
+  content: '';
+  position: absolute;
+  left: 8px; right: 8px; top: 5px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-bottom: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--dur-2) var(--ease-snap), transform var(--dur-2) var(--ease-snap);
+  pointer-events: none;
+}
+.btn:hover::after, .btn:focus-visible::after { opacity: 0.7; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .btn::after { transition: none; }
+}

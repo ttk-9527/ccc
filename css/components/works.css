@@ -1,0 +1,240 @@
+/* =================================================================
+   components/works.css — 04 WORKS：筛选条 / 作品卡 / 空状态提示
+   由 css/components.css 按区块逐字迁移拆分（选择器与规则不改，保持原有行为）
+   死代码（.status-grid / .chan*）已按建议报告 B2 剔除，不再迁入
+/* =================================================================
+
+/* ────────── WORKS ────────── */
+.filter-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 26px;
+}
+.chip {
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  cursor: pointer;
+  clip-path: var(--cut-br);
+  transition: all var(--dur-2) var(--ease-snap);
+}
+.chip:hover { color: var(--ink); border-color: var(--line-strong); }
+.chip[aria-pressed="true"] {
+  background: var(--accent); color: var(--accent-ink);
+  border-color: var(--accent);
+  box-shadow: var(--glow-accent);
+}
+.chip__n { opacity: 0.6; margin-left: 5px; }
+/* 批次2-C：筛选命中时的弹匣指示（弹跳+提亮一次） */
+.chip[aria-pressed="true"] { animation: chipPop 260ms var(--ease-snap) 1; }
+@keyframes chipPop {
+  0%   { transform: translateY(-2px) scale(1.05); filter: brightness(1.3); }
+  100% { transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip[aria-pressed="true"] { animation: none; }
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: clamp(14px, 1.8vw, 22px);
+  perspective: 1100px;
+}
+/* 条目 ≤2 时收窄网格（works.js 加类）：单卡变宽卡，不再留出 2/3 空白 */
+.work-grid--few {
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  max-width: 940px;
+}
+/* 宽卡的媒体区不再按 16:9 放到 500+px：桌面端压成横幅高度，正文行宽收敛 */
+@media (min-width: 768px) {
+  .work-grid--few .work__media { aspect-ratio: auto; height: clamp(260px, 24vw, 340px); }
+  .work-grid--few .work__desc { max-width: 78ch; }
+}
+.work {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  clip-path: var(--cut-br);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: border-color var(--dur-3) var(--ease-snap), box-shadow var(--dur-3) var(--ease-snap);
+}
+.work:hover {
+  border-color: var(--accent);
+  box-shadow: 0 22px 54px -26px rgba(0, 0, 0, 1), var(--glow-accent);
+}
+.work.is-filtered-out { display: none; }
+/* 有 url 的卡片整卡可点（用户反馈修复）：手型光标 + 标题常驻 ↗ 链接标识 */
+.work--link { cursor: pointer; }
+/* Quick Win #1：悬停四角括号收拢（∏/∪ 两伪元素实现四角），配合准星 TARGET LOCKED */
+.work::before, .work::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  left: 8px; right: 8px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-2) var(--ease-snap), transform var(--dur-2) var(--ease-snap);
+}
+.work::before { top: 8px; border-bottom: none; transform: translateY(-6px); }
+.work::after  { bottom: 8px; border-top: none; transform: translateY(6px); }
+.work:hover::before, .work:hover::after { opacity: 0.9; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .work::before, .work::after { transition: none; }
+}
+
+.work__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--bg-3), var(--bg-1));
+}
+.work__media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.12) brightness(0.72) saturate(1.2);
+  transition: filter var(--dur-5) var(--ease-out-hard), transform var(--dur-5) var(--ease-snap);
+}
+.work:hover .work__media img {
+  filter: grayscale(0.1) contrast(1.05) brightness(0.95) saturate(1.35);
+  transform: scale(1.06);
+}
+.work__media::after {
+  content: '';
+  position: absolute; inset: 0;
+  /* 批次2-D：首层为 halftone 网点（4px 网格），下层保留原渐隐+扫描线 */
+  background:
+    radial-gradient(rgba(0, 0, 0, 0.32) 1px, transparent 1.5px) top left / 4px 4px repeat,
+    linear-gradient(180deg, transparent 40%, rgba(4, 1, 11, 0.92) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px);
+}
+/* 无配图时不再是一块空渐变：居中描边代号（项目 code）填满媒体区 */
+.work__media--empty { display: grid; place-items: center; }
+.work__media-code {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  padding: 0 16px;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.4vw, 38px);
+  font-weight: 900;
+  letter-spacing: var(--ls-mid);
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(0, 240, 255, 0.5);
+}
+/* 悬停扫光：替代「灰度→彩色」在无图卡片上的动效亏损 */
+.work__media--empty::before {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: 2;
+  background: linear-gradient(100deg, transparent 34%, rgba(0, 240, 255, 0.16) 47%, rgba(252, 238, 10, 0.2) 53%, transparent 66%);
+  transform: translateX(-130%);
+  opacity: 0;
+  pointer-events: none;
+}
+.work:hover .work__media--empty::before { animation: mediaSweep 820ms var(--ease-out-hard); }
+@keyframes mediaSweep {
+  from { transform: translateX(-130%); opacity: 1; }
+  to   { transform: translateX(130%);  opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .work:hover .work__media--empty::before { animation: none; }
+}
+.work__no {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  padding: 3px 8px;
+  background: rgba(4, 1, 11, 0.82);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.work__year {
+  position: absolute; bottom: 9px; right: 11px; z-index: 2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-2);
+}
+
+.work__body { padding: 16px 18px 18px; display: grid; gap: 10px; align-content: start; }
+.work__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: var(--ls-mid);
+  color: var(--ink);
+  text-transform: uppercase;
+}
+/* D5/t9：仅当项目提供 url 时标题渲染为真外链（Enter 原生新窗口打开）；
+   hover 提亮+下划线，焦点环显式声明（不依赖 base.css :where 零特异性） */
+.work__name-link { color: inherit; text-decoration: none; }
+.work__name-link:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.work__name-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; color: var(--accent); }
+/* 静止态链接标识：标题后常驻强调色 ↗，一眼可辨可点击（用户反馈修复）；
+   悬停时 ↗ 上浮发光，与整卡可点的反馈呼应 */
+.work--link .work__name::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7em;
+  color: var(--accent);
+  vertical-align: 0.2em;
+  transition: transform var(--dur-3) var(--ease-snap), text-shadow var(--dur-3);
+}
+.work--link:hover .work__name::after {
+  transform: translate(3px, -3px);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.work__desc { font-size: var(--fs-sm); color: var(--ink-2); line-height: 1.7; }
+.work__stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.work__stack span {
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-wide);
+  color: var(--cp-cyan);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(0, 240, 255, 0.06);
+}
+.work__metric {
+  display: flex; align-items: baseline; gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--ink-3);
+}
+.work__metric b {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.empty-hint {
+  padding: 34px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  border: 1px dashed var(--line);
+}
+
+/* 筛选后卡片重新入场的位移动画 */
+@keyframes fadeUpIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}

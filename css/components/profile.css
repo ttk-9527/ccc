@@ -1,0 +1,97 @@
+/* =================================================================
+   components/profile.css — 「关于我」卡片网格（图标 + 标签 + 值）
+   由 css/components.css 按区块逐字迁移拆分（选择器与规则不改，保持原有行为）
+   死代码（.status-grid / .chan*）已按建议报告 B2 剔除，不再迁入
+/* =================================================================
+
+/* ═══════════════════════════════════════════════════════════════
+   关于我 · 卡片网格（图标 + 标签 + 值）
+   ═══════════════════════════════════════════════════════════════ */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 1.4vw, 16px);
+}
+
+.profile-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 16px;
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  clip-path: var(--cut-br);
+  transition:
+    border-color var(--dur-2) var(--ease-snap),
+    background var(--dur-2) var(--ease-snap),
+    transform var(--dur-2) var(--ease-snap);
+}
+.profile-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--panel-bg-alt);
+  transform: translateY(-2px);
+}
+.profile-card::after {
+  /* 左上角小刻度，强化 HUD 感 */
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 22px; height: 2px;
+  background: var(--accent);
+  opacity: 0.7;
+}
+
+.profile-card__ico {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  clip-path: var(--cut-br);
+}
+.profile-card__body { min-width: 0; }
+.profile-card__k {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--ink-4);
+  margin-bottom: 4px;
+}
+.profile-card__v {
+  display: block;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.45;
+  word-break: break-word;
+}
+a.profile-card__v { color: var(--cp-cyan); border-bottom: 1px solid rgba(0, 240, 255, 0.35); }
+a.profile-card__v:hover { color: var(--accent); border-bottom-color: currentColor; }
+
+.profile-card__copy {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  cursor: pointer;
+  clip-path: var(--cut-br);
+  opacity: 0;
+  transition: all var(--dur-2) var(--ease-snap);
+}
+.profile-card:hover .profile-card__copy,
+.profile-card:focus-within .profile-card__copy { opacity: 1; }
+.profile-card__copy:hover,
+.profile-card__copy:focus-visible {
+  background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+}
+.profile-card__copy.is-done { opacity: 1; color: var(--cp-lime); border-color: var(--cp-lime); }
+/* 触屏没有 hover，直接常显 */
+@media (hover: none) { .profile-card__copy { opacity: 1; } }

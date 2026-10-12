@@ -1,0 +1,435 @@
+/* ═══════════════════════════════════════════════════════════════
+   fx.css — CRT 叠加层、启动序列、准星、命令终端、Toast、打印样式
+   （原 layout.css 的 CRT 特效层已按建议报告 B3 迁入本文件）
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ────────── CRT 叠加层（自 layout.css 迁入）────────── */
+.fx-stack {
+  position: fixed; inset: 0;
+  z-index: var(--z-fx);
+  pointer-events: none;
+}
+
+/* 扫描线：细密横向条纹 */
+.fx-scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.30) 0px,
+    rgba(0, 0, 0, 0.30) 1px,
+    rgba(255, 255, 255, 0) 1px,
+    rgba(255, 255, 255, 0) 3px
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* 缓慢下移的扫描光带 */
+.fx-scanlines::after {
+  content: '';
+  position: absolute; left: 0; right: 0; height: 22vh;
+  background: linear-gradient(180deg, transparent, rgba(0, 240, 255, 0.055), transparent);
+  animation: scanSweep 7.5s linear infinite;
+}
+@keyframes scanSweep {
+  0%   { top: -22vh; }
+  100% { top: 100vh; }
+}
+
+/* 噪点 */
+.fx-noise {
+  position: absolute; inset: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  animation: noiseJitter 0.6s steps(2) infinite;
+}
+@keyframes noiseJitter {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-2%, 1.5%); }
+  100% { transform: translate(1.5%, -2%); }
+}
+
+/* 暗角 */
+.fx-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(118% 88% at 50% 46%, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+/* RGB 色差边框光晕 */
+.fx-chroma {
+  position: absolute; inset: 0;
+  box-shadow:
+    inset 0 0 120px rgba(255, 0, 60, 0.07),
+    inset 0 0 200px rgba(0, 240, 255, 0.05);
+}
+
+/* 批次2-E：胶片划痕/灰尘层（静态、极低透明度；打印随 .fx-stack 一并隐藏） */
+.fx-scratch {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(101deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 240px),
+    repeating-linear-gradient(-7deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 330px),
+    repeating-linear-gradient(83deg, rgba(255, 255, 255, 0.016) 0 1px, transparent 1px 410px);
+}
+
+/* 全屏故障闪（由 JS 短暂添加 .is-glitching） */
+.fx-stack.is-glitching .fx-chroma {
+  box-shadow:
+    inset 24px 0 60px rgba(255, 0, 60, 0.5),
+    inset -24px 0 60px rgba(0, 240, 255, 0.5);
+}
+body.is-glitching { animation: glitchShift 220ms steps(2) 2; }
+@keyframes glitchShift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-3px, 1px); }
+  50%  { transform: translate(2px, -1px); }
+  75%  { transform: translate(-1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ────────── 启动序列 ────────── */
+.boot {
+  position: fixed; inset: 0;
+  z-index: var(--z-boot);
+  display: grid; place-items: center;
+  padding: 20px;
+  background:
+    radial-gradient(80% 60% at 50% 40%, rgba(28, 11, 58, 0.55), transparent 70%),
+    var(--bg-0);
+  transition: opacity var(--dur-5) var(--ease-out-hard), visibility var(--dur-5);
+}
+.boot.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.boot__panel {
+  width: min(100%, 660px);
+  padding: clamp(20px, 3vw, 34px);
+  background: rgba(6, 2, 16, 0.9);
+  border: 1px solid var(--accent);
+  clip-path: var(--cut-br);
+  box-shadow: 0 0 72px -26px var(--accent), inset 0 0 80px -52px var(--accent);
+  animation: bootIn var(--dur-4) var(--ease-snap) both;
+}
+@keyframes bootIn {
+  from { opacity: 0; transform: translateY(14px) scaleY(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.boot__head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px;
+  padding-bottom: 13px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-hud);
+}
+.boot__brand { color: var(--accent); }
+.boot__ver { color: var(--ink-4); }
+
+.boot__log {
+  margin: 0 0 16px;
+  min-height: 168px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  line-height: 1.9;
+  color: var(--cp-cyan);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.boot__log .ok  { color: var(--cp-lime); }
+.boot__log .warn{ color: var(--cp-amber); }
+.boot__log .hl  { color: var(--accent); }
+
+.boot__bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.boot__bar-fill {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--cp-cyan), var(--accent) 70%, var(--cp-red));
+  box-shadow: 0 0 14px var(--accent);
+  transition: width 160ms linear;
+}
+.boot__pct {
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.boot__enter {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide);
+  cursor: pointer;
+  clip-path: var(--cut-br);
+  animation: bootEnter 1.5s var(--ease-snap) infinite alternate;
+}
+.boot__enter[hidden] { display: none; }
+@keyframes bootEnter {
+  from { box-shadow: 0 0 0 rgba(252, 238, 10, 0); }
+  to   { box-shadow: 0 0 26px -4px var(--accent); }
+}
+.boot__enter-key { opacity: 0.75; font-size: var(--fs-2xs); }
+
+.boot__skip {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-hud);
+  color: var(--ink-4);
+  text-align: center;
+}
+
+/* ────────── 自定义准星 ────────── */
+.reticle {
+  position: fixed; top: 0; left: 0;
+  z-index: var(--z-reticle);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease-snap);
+}
+.reticle.is-on { opacity: 1; }
+.reticle__ring {
+  position: absolute;
+  width: 26px; height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0.7;
+  transition: transform var(--dur-2) var(--ease-snap), border-color var(--dur-2);
+}
+.reticle__dot {
+  position: absolute;
+  width: 3px; height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  background: var(--accent);
+}
+.reticle.is-hot .reticle__ring {
+  transform: scale(1.55) rotate(45deg);
+  border-radius: 3px;
+  border-color: var(--cp-cyan);
+}
+.reticle__label {
+  position: absolute;
+  top: 20px; left: 18px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-hud);
+  color: var(--cp-cyan);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--dur-2), transform var(--dur-2);
+}
+.reticle.is-hot .reticle__label { opacity: 1; transform: none; }
+
+/* 有自定义准星时隐藏系统光标（仅精确指针设备） */
+@media (hover: hover) and (pointer: fine) {
+  html.has-reticle, html.has-reticle * { cursor: none !important; }
+  html.has-reticle input,
+  html.has-reticle textarea { cursor: text !important; }
+}
+
+/* ────────── 命令终端 ────────── */
+.term {
+  position: fixed; inset: 0;
+  z-index: var(--z-term);
+  display: grid;
+  place-items: start center;
+  padding: clamp(14px, 9vh, 110px) 16px 16px;
+}
+.term[hidden] { display: none; }
+.term__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(4, 1, 11, 0.78);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn var(--dur-3) var(--ease-snap) both;
+}
+/* @keyframes fadeIn 已迁移至 base.css（通用关键帧归基线文件） */
+
+.term__panel {
+  position: relative;
+  width: min(100%, 760px);
+  max-height: 74vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: rgba(5, 2, 14, 0.97);
+  border: 1px solid var(--accent);
+  clip-path: var(--cut-br);
+  box-shadow: 0 0 70px -20px var(--accent);
+  animation: termIn var(--dur-3) var(--ease-snap) both;
+}
+@keyframes termIn {
+  from { opacity: 0; transform: translateY(-12px) scaleY(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.term__bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 15px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+}
+.term__title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-hud);
+  color: var(--accent);
+}
+.term__hint {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-mid);
+  color: var(--ink-4);
+}
+.term__hint b { color: var(--cp-cyan); font-weight: 400; }
+.term__x {
+  background: none; border: 1px solid var(--line);
+  color: var(--ink-2);
+  width: 24px; height: 24px;
+  cursor: pointer;
+  transition: all var(--dur-2) var(--ease-snap);
+}
+.term__x:hover { background: var(--cp-red); color: #fff; border-color: var(--cp-red); }
+
+.term__out {
+  padding: 15px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+.term__out p { white-space: pre-wrap; word-break: break-word; }
+.term__out .t-cmd  { color: var(--accent); }
+.term__out .t-ok   { color: var(--cp-lime); }
+.term__out .t-err  { color: var(--cp-red); }
+.term__out .t-dim  { color: var(--ink-4); }
+.term__out .t-key  { color: var(--cp-cyan); }
+.term__out .t-hl   { color: var(--ink); }
+.term__out .t-gap  { height: 9px; }
+
+.term__input {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 15px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.term__prompt {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--cp-lime);
+  white-space: nowrap;
+}
+.term__cmd {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  outline: none;
+}
+
+/* ────────── Toast ────────── */
+.toast-stack {
+  position: fixed;
+  right: clamp(12px, 2vw, 26px);
+  bottom: calc(var(--ticker-h) + 16px);
+  z-index: var(--z-toast);
+  display: grid; gap: 9px;
+  width: min(92vw, 340px);
+  pointer-events: none;
+}
+.toast {
+  position: relative;
+  padding: 12px 15px 12px 17px;
+  background: rgba(6, 2, 16, 0.96);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--cp-cyan);
+  clip-path: var(--cut-br);
+  box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 1);
+  animation: toastIn 260ms var(--ease-snap) both;
+}
+.toast.is-out { animation: toastOut 240ms var(--ease-in-hard) both; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(22px); }
+}
+.toast__k {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--ls-hud);
+  color: var(--cp-cyan);
+  margin-bottom: 3px;
+}
+.toast__m {
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.toast--ok   { border-left-color: var(--cp-lime); }
+.toast--ok .toast__k { color: var(--cp-lime); }
+.toast--err  { border-left-color: var(--cp-red); }
+.toast--err .toast__k { color: var(--cp-red); }
+.toast--warn { border-left-color: var(--cp-amber); }
+.toast--warn .toast__k { color: var(--cp-amber); }
+
+/* ────────── Quick Win #4：点击 RGB 故障错位（glitch.js 事件委托加类）────────── */
+.fx-rgb { animation: rgbSplit 320ms steps(2) 1; }
+@keyframes rgbSplit {
+  0%   { text-shadow: -3px 0 rgba(255, 0, 60, 0.85), 3px 0 rgba(0, 240, 255, 0.85); }
+  50%  { text-shadow: 3px 0 rgba(255, 0, 60, 0.85), -3px 0 rgba(0, 240, 255, 0.85); }
+  100% { text-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) { .fx-rgb { animation: none; } }
+
+/* ────────── 打印 ────────── */
+@media print {
+  .bg-stack, .fx-stack, .hud-frame, .hud-top, .hud-bottom,
+  .boot, .reticle, .term, .toast-stack, .scroll-rail, .hero__cta { display: none !important; }
+  body { background: #fff; color: #000; }
+  .panel, .job, .work { border-color: #ccc; background: #fff; box-shadow: none; }
+  .sect { padding: 18px 0; break-inside: avoid; }
+  .sect--status { min-height: auto; }
+
+  /* D1(P0)：内容可见性——打印稿不能是「空白 + 折叠 + 被过滤」的
+     1) 没滚动到（reveal 未触发）的元素打印时全部可见 */
+  .js-reveal [data-reveal] { opacity: 1 !important; transform: none !important; }
+  /* 2) 经历 / 时间线明细默认折叠 → 打印时全部展开（覆盖 components/career.css 的 0fr 折叠） */
+  .job__body { grid-template-rows: 1fr !important; }
+  /* 3) 被筛选隐藏的作品卡恢复打印（覆盖 components/works.css 的 display:none） */
+  .work.is-filtered-out { display: grid !important; }
+  /* 4) 区块氛围底图与 CRT 叠加层不进打印稿 */
+  .sect__bg, .fx-noise, .fx-scanlines { display: none !important; }
+  /* 打印稿不需要的交互残留：筛选空态提示（卡片已全部恢复，提示会自相矛盾）
+     与打字机光标（首行文案由 beforeprint 钩子写入，光标块不该印出来） */
+  .empty-hint { display: none !important; }
+  .type-caret { display: none !important; }
+  /* 区块幽灵编号是屏幕装饰，不进打印稿 */
+  .sect__ghost { display: none !important; }
+}
